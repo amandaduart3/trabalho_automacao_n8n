@@ -85,7 +85,7 @@ flowchart TD
 **1. Clone o repositório e configure as variáveis de ambiente:**
 ```bash
 git clone https://github.com/amandaduart3/trabalho_automacao_n8n.git
-cd flashcards-temporizados-n8n
+cd trabalhoFinal_automacao   
 cp .env.example .env
 ```
 > Edite o arquivo `.env` preenchendo suas credenciais locais do PostgreSQL e URLs de rede.
