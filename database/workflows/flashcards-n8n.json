@@ -1,0 +1,636 @@
+{
+  "name": "Flashcards Temporizados - Blindado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -80
+      ],
+      "id": "24f67988-16f6-41d9-9ef0-e508dec72b7d",
+      "name": "Webhook1",
+      "webhookId": "66c4ace6-861d-419c-b733-75616a447cd6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "49a8dfe1-a62a-4193-a96c-bb0c277ee363",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "19cc0668-3149-4c23-bbc7-31bef42ac29c",
+              "name": "session",
+              "value": "={{ $json.body.session }}",
+              "type": "string"
+            },
+            {
+              "id": "95b4c385-9c1a-40af-ac43-63bc85c4559a",
+              "name": "chat_id",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "c1a2b3c4-5678-90ab-cdef-1234567890ab",
+              "name": "from_me",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "d2e3f4a5-6789-01bc-def2-34567890abcd",
+              "name": "timestamp",
+              "value": "={{ $json.body.payload.timestamp }}",
+              "type": "number"
+            },
+            {
+              "id": "e3f4a5b6-7890-12cd-ef34-567890abcdef",
+              "name": "hasMedia",
+              "value": "={{ $json.body.payload.hasMedia }}",
+              "type": "boolean"
+            },
+            {
+              "id": "842436de-64aa-4e5d-b3fb-f810b64c2dce",
+              "name": "telefone",
+              "value": "={{ (() => {\n  let num = ($json.body.payload._data?.key?.remoteJidAlt || $json.body.payload.from || '').replace(/@.*$/, '').replace(/^55/, '');\n  num = num.replace(/\\D/g, ''); \n  if (num.length === 10) {\n    num = num.substring(0, 2) + '9' + num.substring(2);\n  }\n  return `(${num.substring(0,2)}) ${num.substring(2,7)}-${num.substring(7)}`;\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "7dcf125c-7a53-4b29-a455-626c43ec6558",
+              "name": "mensagem",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "3426d814-890f-4103-9c2f-d05ed64618c1",
+              "name": "nome_usuario",
+              "value": "={{ $json.body.payload._data?.pushName || $json.body.payload.pushName || 'Usuário' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        -80
+      ],
+      "id": "c57384ce-a7f5-41d1-93ef-4d36263fe707",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "69fe7a60-2139-4fad-b4b7-7171bdd70902",
+              "leftValue": "={{ String($json.from_me) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "90e0b741-9a99-47f6-a3c6-0f7236d3968d",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "status@broadcast",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "b6b956a1-e1c2-4122-a36b-70617868ad57",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "message.any",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "ae76e6a6-b0e9-469b-bdf2-e543d26ee9f3",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "bafb84ba-b1ab-456b-885a-4071e872f59c",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "@newsletter",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "1d0d81c0-3fd5-495c-900a-9997ddcfd432",
+              "leftValue": "={{ $json.timestamp }}",
+              "rightValue": "={{ Math.floor(Date.now() / 1000) - 120 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "filtro-sem-midia",
+              "leftValue": "={{ String($json.hasMedia) }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "5a483444-899f-4667-a5ec-5a682ef6b1b9",
+              "leftValue": "={{ /^(!card|\\/card|!flashcard|\\/flashcard)$/i.test(($json.mensagem || '').trim()) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "17a64df3-2cb3-4f84-9448-a11f79e56643",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -80
+      ],
+      "id": "2efed1bc-9413-4a70-98a1-eb0257758d5d",
+      "name": "Filtros Blindados WAHA"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        144
+      ],
+      "id": "f4046116-e54b-4b93-bd3e-3ead1a174897",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT t.id, t.disciplina, t.topico, c.meu_chat_id, c.waha_session\nFROM config_bot c\nLEFT JOIN topicos_estudo t ON TRUE\nWHERE c.id = 1\nORDER BY t.ultima_revisao ASC NULLS FIRST, t.vezes_revisado ASC, t.id ASC\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "alwaysOutputData": true,
+      "position": [
+        256,
+        16
+      ],
+      "id": "6cc49d08-752c-4d88-a292-010464bd9c5c",
+      "name": "Buscar Topico Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "aAyhZ2X2nnv1PODt",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-chat-id",
+              "name": "chat_id",
+              "value": "={{ $json.meu_chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "field-session",
+              "name": "session",
+              "value": "={{ $json.waha_session || 'default' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-topico-id",
+              "name": "topico_id",
+              "value": "={{ $json.id || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "field-disciplina",
+              "name": "disciplina",
+              "value": "={{ $json.disciplina || 'Sem disciplina' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-topico",
+              "name": "topico",
+              "value": "={{ $json.topico || 'Nenhum tópico cadastrado no banco' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        0
+      ],
+      "id": "fb174f5b-071d-425a-9b9b-959f552683a0",
+      "name": "Configurar Contexto"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-4-hydrogen:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Você é um tutor especialista em concursos públicos de TI (banca Cesgranrio). Gere 1 flashcard técnico e direto sobre a disciplina '{{ $json.disciplina }}' e o tópico '{{ $json.topico }}'. A pergunta deve exigir uma definição técnica ou diferenciação clara que possa ser escrita à mão em até 35 segundos. A resposta deve ser objetiva e precisa. Retorne APENAS um objeto JSON válido com as chaves 'pergunta' e 'resposta'.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseMimeType\": \"application/json\",\n    \"temperature\": 0.4\n  }\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        688,
+        16
+      ],
+      "id": "bf9db379-e0ed-4abf-959f-65469b9b255c",
+      "name": "Gerar Flashcard Gemini",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PlSYcLzlb0XleoGV",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json?.candidates?.[0]?.content?.parts?.[0]?.text || '';\nconst contexto = $('Configurar Contexto').first().json;\n\nlet origemChatId = null;\ntry {\n  origemChatId = $('Edit Fields1').first()?.json?.chat_id || null;\n} catch (e) {\n}\nif (origemChatId && origemChatId !== contexto.chat_id) {\n  return [{ json: { valido: false, erro: 'Comando enviado fora do chat autorizado.' } }];\n}\n\nif (!contexto.topico_id) {\n  return [{ json: { valido: false, erro: 'A tabela topicos_estudo está vazia no PostgreSQL.' } }];\n}\n\ntry {\n  const cleanJson = rawText.replace(/```json|```/g, '').trim();\n  const parsed = JSON.parse(cleanJson);\n\n  if (!parsed.pergunta || !parsed.resposta) {\n    return [{ json: { valido: false, erro: 'JSON incompleto retornado pela IA.' } }];\n  }\n\n  const textoPergunta = `🧠 *FLASHCARD DE REVISÃO*\\n` +\n    `📚 *Disciplina:* ${contexto.disciplina}\\n` +\n    `📌 *Tópico:* ${contexto.topico}\\n\\n` +\n    `❓ *Pergunta:*\\n${parsed.pergunta}\\n\\n` +\n    `⏳ _Você tem 40 segundos para anotar sua resposta no caderno..._`;\n\n  const textoResposta = `✅ *GABARITO DO FLASHCARD*\\n\\n` +\n    `💡 *Resposta esperada:*\\n${parsed.resposta}\\n\\n` +\n    `📝 _Compare com o que você escreveu no caderno!_`;\n\n  return [{\n    json: {\n      valido: true,\n      pergunta: parsed.pergunta,\n      resposta: parsed.resposta,\n      texto_pergunta: textoPergunta,\n      texto_resposta: textoResposta\n    }\n  }];\n} catch (e) {\n  return [{\n    json: {\n      valido: false,\n      erro: `Falha ao interpretar JSON: ${e.message}`\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -64
+      ],
+      "id": "87d71fcb-060c-4b92-8889-c26eeea1a3f1",
+      "name": "Processar e Validar JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-valido",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -64
+      ],
+      "id": "c13797d0-598a-45c6-a3fb-c5b04e2093d3",
+      "name": "Validar Payload"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Configurar Contexto').item.json.session }}",
+        "chatId": "={{ $('Configurar Contexto').item.json.chat_id }}",
+        "text": "={{ $json.texto_pergunta }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1392,
+        -144
+      ],
+      "id": "31ec16e8-7c82-44fa-b2cf-29de0be2c042",
+      "name": "Enviar Pergunta WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "qceUFrzOfRHp7bca",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 40
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        -144
+      ],
+      "id": "39455f66-d5cc-4699-9e2a-5224f920fbf1",
+      "name": "Aguardar 40s",
+      "webhookId": "b9c8d7e6-4000-4000-8000-000000000008"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Configurar Contexto').item.json.session }}",
+        "chatId": "={{ $('Configurar Contexto').item.json.chat_id }}",
+        "text": "={{ $('Processar e Validar JSON').item.json.texto_resposta }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1840,
+        -144
+      ],
+      "id": "9e4592ea-cbea-4196-b889-7617d03703a3",
+      "name": "Enviar Resposta WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "qceUFrzOfRHp7bca",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE topicos_estudo\nSET ultima_revisao = NOW(),\n    vezes_revisado = vezes_revisado + 1\nWHERE id = {{ $('Configurar Contexto').item.json.topico_id }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2048,
+        -144
+      ],
+      "id": "5964e77f-bc2c-4356-a5c4-100b0cb423df",
+      "name": "Atualizar Revisao Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "aAyhZ2X2nnv1PODt",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Configurar Contexto').item.json.session }}",
+        "chatId": "={{ $('Configurar Contexto').item.json.chat_id }}",
+        "text": "=⚠️ *Alerta de Resiliência (Bot Estudos)*\n\nNão foi possível gerar o flashcard automático agora devido a uma falha na comunicação com a API ou validação do payload.\n\n📌 *Tópico pendente para revisão manual:*\n{{ $('Configurar Contexto').item.json.disciplina }} - {{ $('Configurar Contexto').item.json.topico }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1216,
+        208
+      ],
+      "id": "a9457911-4be9-4b39-9cd4-4091395a20ff",
+      "name": "Notificar Falha WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "qceUFrzOfRHp7bca",
+          "name": "WAHA account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Filtros Blindados WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtros Blindados WAHA": {
+      "main": [
+        [
+          {
+            "node": "Buscar Topico Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar Topico Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Topico Postgres": {
+      "main": [
+        [
+          {
+            "node": "Configurar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configurar Contexto": {
+      "main": [
+        [
+          {
+            "node": "Gerar Flashcard Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Flashcard Gemini": {
+      "main": [
+        [
+          {
+            "node": "Processar e Validar JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificar Falha WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar e Validar JSON": {
+      "main": [
+        [
+          {
+            "node": "Validar Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Payload": {
+      "main": [
+        [
+          {
+            "node": "Enviar Pergunta WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificar Falha WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Pergunta WAHA": {
+      "main": [
+        [
+          {
+            "node": "Aguardar 40s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 40s": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Resposta WAHA": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Revisao Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0591f86e-a1b7-44e8-bcb0-263db1f4b93b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "daf6c7d0e32ff162013677da8e8ee50597b5d801fd1a22d2c0b89cdaad03d6e6"
+  },
+  "nodeGroups": [],
+  "id": "QmjAlWtVLlPzWs7U",
+  "tags": []
+}
