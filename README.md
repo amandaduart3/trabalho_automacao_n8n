@@ -116,7 +116,7 @@ docker compose exec -T postgres psql -U n8n_user -d automation_db < database/ini
 
 Abaixo está o registro real da execução completa: o disparo do comando `!card`, o recebimento imediato da questão, a espera de 40 segundos para escrita manual e a entrega automática do gabarito:
 
-![Demonstração de Execução no WhatsApp](docs/demo-whatsapp.gif)
+![Demonstração de Execução no WhatsApp](docs/demo-whatsapp.mp4)
 
 ---
 
