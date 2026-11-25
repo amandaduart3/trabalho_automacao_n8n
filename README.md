@@ -84,7 +84,7 @@ flowchart TD
 
 **1. Clone o repositório e configure as variáveis de ambiente:**
 ```bash
-git clone https://github.com/SEU_USUARIO/flashcards-temporizados-n8n.git
+git clone https://github.com/amandaduart3/trabalho_automacao_n8n.git
 cd flashcards-temporizados-n8n
 cp .env.example .env
 ```
